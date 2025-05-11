@@ -6,6 +6,7 @@ import { parseISO, format } from "date-fns"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { PageHeader } from "@/components/page-header"
+import { usePathname } from "next/navigation"
 
 interface ChartData {
   month: string
@@ -51,6 +52,7 @@ function getYearTicks(data: ChartData[]) {
 export function PullRequestsOverTimeChart() {
   const [data, setData] = useState<ChartData[]>([])
   const [loading, setLoading] = useState(true)
+  const pathname = usePathname()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,7 +72,7 @@ export function PullRequestsOverTimeChart() {
 
   return (
     <div className="space-y-8">
-      {window.location.pathname === "/prs-over-time" && (
+      {pathname === "/prs-over-time" && (
         <PageHeader
           title="Pull Requests über die Zeit"
           description="Alle Pull Requests, die von Open Elements erstellt wurden zeitlich angeordnet"
