@@ -72,12 +72,16 @@ export function ProjectsTable() {
     return null
   }
 
-  // Function to truncate description
-  const truncateDescription = (description: string, maxLength = 100) => {
+  // Function to truncate description to about 3 words
+  const truncateDescription = (description: string) => {
     if (!description) return "No description available"
     if (description === "TODO") return "Description coming soon"
-    if (description.length <= maxLength) return description
-    return `${description.substring(0, maxLength)}...`
+
+    // Split by spaces and take first 3 words
+    const words = description.split(" ").slice(0, 3).join(" ")
+
+    // Add ellipsis if the description is longer than 3 words
+    return description.split(" ").length > 3 ? `${words}...` : words
   }
 
   const columns: ColumnDef<Project>[] = [
