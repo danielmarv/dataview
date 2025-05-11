@@ -5,16 +5,26 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { DataTable } from "@/components/data-table"
 import { apiClient } from "@/lib/api-client"
 import { PageHeader } from "@/components/page-header"
-import { FolderKanban } from "lucide-react"
+import { FolderKanban, Github } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useTheme } from "next-themes"
 
 interface Project {
+  uuid: string
   name: string
   description: string
+  svgLogoForBrightBackground: string | null
+  svgLogoForDarkBackground: string | null
+  pngLogoForBrightBackground: string | null
+  pngLogoForDarkBackground: string | null
+  matchingRepos: string[]
 }
 
 export function ProjectsTable() {
   const [data, setData] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
+  const { theme } = useTheme()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,16 +41,44 @@ export function ProjectsTable() {
     fetchData()
   }, [])
 
+  const getProjectLogo = (project: Project) => {
+    const isDark = theme === "dark"
+
+    // Try to get SVG logo first
+    if (isDark && project.svgLogoForDarkBackground) {
+      return `/data/logo/${project.svgLogoForDarkBackground}`
+    } else if (!isDark && project.svgLogoForBrightBackground) {
+      return `/data/logo/${project.svgLogoForBrightBackground}`
+    }
+
+    // Fall back to PNG logo
+    if (isDark && project.pngLogoForDarkBackground) {
+      return `/data/logo/${project.pngLogoForDarkBackground}`
+    } else if (!isDark && project.pngLogoForBrightBackground) {
+      return `/data/logo/${project.pngLogoForBrightBackground}`
+    }
+
+    // No logo available
+    return null
+  }
+
   const columns: ColumnDef<Project>[] = [
     {
       accessorKey: "name",
       header: "Name",
       cell: ({ row }) => {
         const name = row.getValue("name") as string
+        const project = row.original
+        const logoUrl = getProjectLogo(project)
+
         return (
-          <div className="flex items-center gap-2">
-            <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-md">
-              <FolderKanban className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-md flex items-center justify-center w-10 h-10">
+              {logoUrl ? (
+                <img src={logoUrl || "/placeholder.svg"} alt={name} className="max-w-full max-h-full" />
+              ) : (
+                <FolderKanban className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              )}
             </div>
             <span className="font-medium">{name}</span>
           </div>
@@ -53,6 +91,61 @@ export function ProjectsTable() {
       cell: ({ row }) => {
         const description = row.getValue("description") as string
         return <div className="max-w-md">{description}</div>
+      },
+    },
+    {
+      accessorKey: "matchingRepos",
+      header: "Repositories",
+      cell: ({ row }) => {
+        const matchingRepos = row.getValue("matchingRepos") as string[]
+
+        if (!matchingRepos || matchingRepos.length === 0) {
+          return <span className="text-muted-foreground text-sm">Keine</span>
+        }
+
+        return (
+          <div className="flex flex-wrap gap-2">
+            {matchingRepos.slice(0, 2).map((repo, index) => {
+              const parts = repo.split("/")
+              const org = parts[0]
+              const repoName = parts.length > 1 ? parts[1] : repo
+
+              return (
+                <TooltipProvider key={index}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <a
+                        href={`https://github.com/${repo}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <Github className="h-3 w-3" />
+                        {repoName}
+                      </a>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{repo}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )
+            })}
+            {matchingRepos.length > 2 && (
+              <Badge variant="outline" className="text-xs">
+                +{matchingRepos.length - 2} weitere
+              </Badge>
+            )}
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: "uuid",
+      header: "ID",
+      cell: ({ row }) => {
+        const uuid = row.getValue("uuid") as string
+        return <span className="text-xs text-muted-foreground font-mono">{uuid.substring(0, 8)}...</span>
       },
     },
   ]

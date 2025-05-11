@@ -9,13 +9,15 @@ import {
   type SortingState,
   useReactTable,
   getPaginationRowModel,
+  getFilteredRowModel,
 } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, Download, FileJson } from "lucide-react"
+import { ArrowUpDown, Download, FileJson, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { saveAs } from "file-saver"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Input } from "@/components/ui/input"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -24,6 +26,7 @@ interface DataTableProps<TData, TValue> {
   description: string
   loading?: boolean
   limit?: number
+  searchable?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -33,8 +36,10 @@ export function DataTable<TData, TValue>({
   description,
   loading = false,
   limit,
+  searchable = true,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
+  const [globalFilter, setGlobalFilter] = useState("")
 
   const limitedData = limit ? data.slice(0, limit) : data
 
@@ -45,8 +50,11 @@ export function DataTable<TData, TValue>({
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
+      globalFilter,
     },
     initialState: {
       pagination: {
@@ -102,6 +110,20 @@ export function DataTable<TData, TValue>({
             </div>
           )}
         </div>
+
+        {searchable && !loading && data.length > 5 && (
+          <div className="mt-4">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Suchen..."
+                value={globalFilter ?? ""}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="p-0">
         <div className="rounded-md border">
@@ -158,18 +180,25 @@ export function DataTable<TData, TValue>({
         </div>
 
         {!limit && data.length > 10 && (
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Zurück
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-              Weiter
-            </Button>
+          <div className="flex items-center justify-between py-4 px-2">
+            <div className="flex-1 text-sm text-muted-foreground">
+              Seite {table.getState().pagination.pageIndex + 1} von {table.getPageCount()}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Zurück
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                Weiter
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
           </div>
         )}
 

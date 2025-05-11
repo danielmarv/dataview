@@ -5,9 +5,12 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { DataTable } from "@/components/data-table"
 import { apiClient } from "@/lib/api-client"
 import { PageHeader } from "@/components/page-header"
-import { Github } from "lucide-react"
+import { Github, ExternalLink } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface Repository {
+  uuid: string
   org: string
   repository: string
 }
@@ -39,15 +42,10 @@ export function RepositoriesTable() {
         const org = row.getValue("org") as string
         return (
           <div className="flex items-center gap-2">
-            <Github className="h-4 w-4 text-muted-foreground" />
-            <a
-              href={`https://github.com/${org}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium hover:underline"
-            >
-              {org}
-            </a>
+            <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800">
+              <Github className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+              <span>{org}</span>
+            </Badge>
           </div>
         )
       },
@@ -59,15 +57,33 @@ export function RepositoriesTable() {
         const org = row.getValue("org") as string
         const repo = row.getValue("repository") as string
         return (
-          <a
-            href={`https://github.com/${org}/${repo}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            {repo}
-          </a>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <a
+                  href={`https://github.com/${org}/${repo}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1"
+                >
+                  {repo}
+                  <ExternalLink className="h-3.5 w-3.5 ml-1" />
+                </a>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Repository auf GitHub öffnen</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )
+      },
+    },
+    {
+      accessorKey: "uuid",
+      header: "ID",
+      cell: ({ row }) => {
+        const uuid = row.getValue("uuid") as string
+        return <span className="text-xs text-muted-foreground font-mono">{uuid.substring(0, 8)}...</span>
       },
     },
   ]
