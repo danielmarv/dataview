@@ -5,10 +5,19 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { DataTable } from "@/components/data-table"
 import { apiClient } from "@/lib/api-client"
 import { PageHeader } from "@/components/page-header"
-import { FolderKanban, Github } from "lucide-react"
+import { FolderKanban, Github, Info } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useTheme } from "next-themes"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 interface Project {
   uuid: string
@@ -25,6 +34,7 @@ export function ProjectsTable() {
   const [data, setData] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const { theme } = useTheme()
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,6 +72,14 @@ export function ProjectsTable() {
     return null
   }
 
+  // Function to truncate description
+  const truncateDescription = (description: string, maxLength = 100) => {
+    if (!description) return "No description available"
+    if (description === "TODO") return "Description coming soon"
+    if (description.length <= maxLength) return description
+    return `${description.substring(0, maxLength)}...`
+  }
+
   const columns: ColumnDef<Project>[] = [
     {
       accessorKey: "name",
@@ -90,7 +108,7 @@ export function ProjectsTable() {
       header: "Beschreibung",
       cell: ({ row }) => {
         const description = row.getValue("description") as string
-        return <div className="max-w-md">{description}</div>
+        return <div className="max-w-md">{truncateDescription(description)}</div>
       },
     },
     {
@@ -141,11 +159,59 @@ export function ProjectsTable() {
       },
     },
     {
-      accessorKey: "uuid",
-      header: "ID",
+      id: "actions",
       cell: ({ row }) => {
-        const uuid = row.getValue("uuid") as string
-        return <span className="text-xs text-muted-foreground font-mono">{uuid.substring(0, 8)}...</span>
+        const project = row.original
+        return (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={() => setSelectedProject(project)} className="ml-auto">
+                <Info className="h-4 w-4" />
+                <span className="sr-only">Details</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3">
+                  <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-md flex items-center justify-center w-10 h-10">
+                    {getProjectLogo(project) ? (
+                      <img src={getProjectLogo(project) || ""} alt={project.name} className="max-w-full max-h-full" />
+                    ) : (
+                      <FolderKanban className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    )}
+                  </div>
+                  {project.name}
+                </DialogTitle>
+                <DialogDescription>
+                  {project.description === "TODO" ? "Description coming soon" : project.description}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-6 space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Repositories</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {project.matchingRepos.map((repo, index) => (
+                      <a
+                        key={index}
+                        href={`https://github.com/${repo}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <Github className="h-3 w-3" />
+                        {repo}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Project ID</h4>
+                  <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">{project.uuid}</code>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )
       },
     },
   ]
