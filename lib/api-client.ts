@@ -12,7 +12,7 @@ export class OpenDataApiClient {
 
   constructor(baseUrl?: string) {
     // Update this to point to your real API server
-    this.baseUrl = baseUrl || process.env.NEXT_PUBLIC_API_BASE_URL || "https://your-api-server.com/api"
+    this.baseUrl = baseUrl || process.env.NEXT_PUBLIC_API_BASE_URL || "/api"
   }
 
   async getJson(endpoint: string) {
