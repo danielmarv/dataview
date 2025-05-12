@@ -68,11 +68,9 @@ export function ProjectsTable() {
       return `/data/logo/${project.pngLogoForBrightBackground}`
     }
 
-    // No logo available
     return null
   }
 
-  // Function to truncate description to about 3 words
   const truncateDescription = (description: string) => {
     if (!description) return "No description available"
     if (description === "TODO") return "Description coming soon"
