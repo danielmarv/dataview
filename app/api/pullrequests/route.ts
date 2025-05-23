@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 
 export async function GET() {
-  // Mock data - in a real app, this would come from a database or external API
   const pullrequests = [
     {
       uuid: "pr1",
