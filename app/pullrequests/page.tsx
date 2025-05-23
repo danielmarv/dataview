@@ -4,7 +4,7 @@ import { PullRequestsTable } from "@/components/pull-requests-table"
 export default function PullRequestsPage() {
   return (
     <div>
-      <DashboardHeader />
+      {/* <DashboardHeader /> */}
       <PullRequestsTable />
     </div>
   )

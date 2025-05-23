@@ -30,7 +30,7 @@ const navigation = [
     children: [
       { name: "Repositories", href: "/repositories", icon: Github },
       { name: "Pull Requests", href: "/pullrequests", icon: GitPullRequest },
-      { name: "Merged PRs pro Projekt", href: "/prs-by-project", icon: GitMerge },
+      { name: "Merged PRs pro Projekt", href: "/prs-by-projects", icon: GitMerge },
       { name: "Pull Requests nach Zeit", href: "/prs-over-time", icon: Clock },
       { name: "Support & Care PRs", href: "/support-care-prs", icon: HeartHandshake },
     ],

@@ -4,7 +4,7 @@ import { RepositoriesTable } from "@/components/repositories-table"
 export default function RepositoriesPage() {
   return (
     <div>
-      <DashboardHeader />
+      {/* <DashboardHeader /> */}
       <RepositoriesTable />
     </div>
   )

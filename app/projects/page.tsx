@@ -8,7 +8,7 @@ export default function ProjectsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <DashboardHeader />
+        {/* <DashboardHeader /> */}
         <Button variant="outline" asChild>
           <Link href="/projects/grid">
             <GridIcon className="h-4 w-4 mr-2" />

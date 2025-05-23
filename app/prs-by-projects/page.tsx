@@ -4,7 +4,7 @@ import { MergedPRsPerProjectTable } from "@/components/merged-prs-per-project-ta
 export default function PRsByProjectPage() {
   return (
     <div>
-      <DashboardHeader />
+      {/* <DashboardHeader /> */}
       <MergedPRsPerProjectTable />
     </div>
   )

@@ -4,7 +4,7 @@ import { OrganizationsTable } from "@/components/organizations-table"
 export default function OrganizationsPage() {
   return (
     <div>
-      <DashboardHeader />
+      {/* <DashboardHeader /> */}
       <OrganizationsTable />
     </div>
   )

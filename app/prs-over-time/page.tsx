@@ -4,7 +4,7 @@ import { PullRequestsOverTimeChart } from "@/components/pull-requests-over-time-
 export default function PRsOverTimePage() {
   return (
     <div>
-      <DashboardHeader />
+      {/* <DashboardHeader /> */}
       <PullRequestsOverTimeChart />
     </div>
   )
